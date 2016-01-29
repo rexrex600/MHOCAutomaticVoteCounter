@@ -68,6 +68,7 @@ def VoteCount(thread,billnum):
                         wks.update_cell(row,column,"Abst")
 
 
+
 def deformat():
     cell_list = wks.range("C3:C141")
     for cell in cell_list:
