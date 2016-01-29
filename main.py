@@ -44,7 +44,7 @@ def VoteCount(thread,billnum):
         if comment.id not in already_done:
             print(comment.body)
             print(comment.author)
-            if str(comment.author).lower() is not "automoderator":
+            try:
                 already_done.append(comment.id)
                 if "aye" in str(comment.body).lower():
                     already_done.append(comment.id)
@@ -66,6 +66,8 @@ def VoteCount(thread,billnum):
                     val = wks.cell(row,column).value
                     if "N/A" not in val:
                         wks.update_cell(row,column,"Abst")
+            except gspread.exceptions.CellNotFound:
+                print("Automod Comment")
 
 
 
