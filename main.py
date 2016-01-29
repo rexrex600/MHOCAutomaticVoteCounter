@@ -4,7 +4,7 @@ import json
 import gspread
 from oauth2client.client import SignedJwtAssertionCredentials
 
-json_key = json.load(open('VoteCounter2-4813f2f9f7f3.json'))
+json_key = json.load(open('VoteCounter2-af942bc69325.json'))
 scope = ['https://spreadsheets.google.com/feeds']
 
 credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
@@ -12,38 +12,61 @@ r = praw.Reddit("Vote Counting Bot")
 gc = gspread.authorize(credentials)
 sh = gc.open('Copy of MHoC Master Sheet')
 wks = sh.worksheet("7th Govt Voting Record")
-r.login('agentnola','')
+
 #print("Input thread id")
 #thread = raw_input()
 
 #print("Input bill number")
 #billnum = raw_input()
+print("Reddit Username:")
+user = raw_input()
 
-id = '42zo6y'
-bill = "B226"
+
+print("Reddit Password:")
+password = raw_input()
+r.login(user,password)
+
+print("Post Voting Thread Link")
+tread = raw_input()
+print("Post billnumber(without the B infront of it)")
+bill = 'B'+raw_input()
 
 
 
 def VoteCount(thread,billnum):
-    column = wks.find(billnum).col
+    column = int(wks.find(billnum).col)
 
     already_done = []
-    submission = r.get_submission(submission_id='42zo6y')
+    submission = r.get_submission(thread)
     comments = praw.helpers.flatten_tree(submission.comments)
 
     for comment in comments:
         if comment.id not in already_done:
             print comment.body
             print comment.author
-            if "Aye" in comment.body:
+            if "aye" in str(comment.body).lower():
                 already_done.append(comment.id)
-                row = wks.find(comment.author).row
-                wks.update_cell(row,column,"Aye")
+                row = int(wks.find(str(comment.author).lower()).row)
 
-            if "Nay" in comment.body:
+                val = wks.cell(row,column)
+                if "N/A" not in val.value:
+                    wks.update_cell(row,column,"Aye")
+
+            if "nay" in str(comment.body).lower():
                 already_done.append(comment.id)
-                row = wks.find(comment.author).row
-                wks.update_cell(row,column,"Nay")
+                row = wks.find(str(comment.author).lower()).row
+                val = wks.cell(row,column).value
+                if "N/A" not in val:
+                    wks.update_cell(row,column,"Nay")
+
+def deformat():
+    cell_list = wks.range("C3:C141")
+    for cell in cell_list:
+        value = str(cell.value).lower()
+
+
+
+        wks.update_cell(cell.row,cell.col,value)
 
 
 
@@ -51,5 +74,5 @@ def VoteCount(thread,billnum):
 
 
 
-
+##deformat()
 VoteCount(id,bill)
