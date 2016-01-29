@@ -1,4 +1,4 @@
-__author__ = 'Wade'
+__author__ = 'agentnola'
 import praw
 import json
 import gspread
