@@ -27,7 +27,7 @@ password = raw_input()
 r.login(user,password)
 
 print("Post Voting Thread Link")
-tread = raw_input()
+tread = str(raw_input())
 print("Post billnumber(without the B infront of it)")
 bill = 'B'+raw_input()
 
@@ -42,8 +42,8 @@ def VoteCount(thread,billnum):
 
     for comment in comments:
         if comment.id not in already_done:
-            print comment.body
-            print comment.author
+            print(comment.body)
+            print(comment.author)
             if "aye" in str(comment.body).lower():
                 already_done.append(comment.id)
                 row = int(wks.find(str(comment.author).lower()).row)
@@ -75,4 +75,4 @@ def deformat():
 
 
 ##deformat()
-VoteCount(id,bill)
+VoteCount(tread,bill)
