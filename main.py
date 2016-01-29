@@ -4,28 +4,20 @@ import json
 import gspread
 from oauth2client.client import SignedJwtAssertionCredentials
 
+#Loads the JSON Key, which is provided seperately
 json_key = json.load(open('VoteCounter2-af942bc69325.json'))
 scope = ['https://spreadsheets.google.com/feeds']
-
+# Initilises all the credentials, and GoogleSheet stuff 
 credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
 r = praw.Reddit("Vote Counting Bot")
 gc = gspread.authorize(credentials)
 sh = gc.open('Copy of MHoC Master Sheet')
 wks = sh.worksheet("7th Govt Voting Record")
-
-#print("Input thread id")
-#thread = raw_input()
-
-#print("Input bill number")
-#billnum = raw_input()
-
+#User Input for Reddit/ Reddit information
 user = str(input("Reddit Username:"))
-
-
 print("Reddit Password:")
 password = str(input())
 r.login(user,password)
-
 print("Post Voting Thread Link")
 tread = str(input())
 print("Post billnumber(without the B infront of it)")
