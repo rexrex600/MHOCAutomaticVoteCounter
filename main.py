@@ -44,10 +44,8 @@ def VoteCount(thread,billnum):
         if comment.id not in already_done:
             print(comment.body)
             print(comment.author)
-            if comment.author == "AutoModerator":
+            if str(comment.author).lower() is not "automoderator":
                 already_done.append(comment.id)
-
-            else:
                 if "aye" in str(comment.body).lower():
                     already_done.append(comment.id)
                     row = int(wks.find(str(comment.author).lower()).row)
@@ -62,6 +60,13 @@ def VoteCount(thread,billnum):
                     val = wks.cell(row,column).value
                     if "N/A" not in val:
                         wks.update_cell(row,column,"Nay")
+                if "abstain" in str(comment.body).lower():
+                    already_done.append(comment.id)
+                    row = wks.find(str(comment.author).lower()).row
+                    val = wks.cell(row,column).value
+                    if "N/A" not in val:
+                        wks.update_cell(row,column,"Abst")
+
 
 def deformat():
     cell_list = wks.range("C3:C141")
