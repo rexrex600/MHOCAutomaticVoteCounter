@@ -18,18 +18,18 @@ wks = sh.worksheet("7th Govt Voting Record")
 
 #print("Input bill number")
 #billnum = raw_input()
-print("Reddit Username:")
-user = raw_input()
+
+user = str(input("Reddit Username:"))
 
 
 print("Reddit Password:")
-password = raw_input()
+password = str(input())
 r.login(user,password)
 
 print("Post Voting Thread Link")
-tread = str(raw_input())
+tread = str(input())
 print("Post billnumber(without the B infront of it)")
-bill = 'B'+raw_input()
+bill = 'B'+input()
 
 
 
@@ -44,20 +44,24 @@ def VoteCount(thread,billnum):
         if comment.id not in already_done:
             print(comment.body)
             print(comment.author)
-            if "aye" in str(comment.body).lower():
+            if comment.author == "AutoModerator":
                 already_done.append(comment.id)
-                row = int(wks.find(str(comment.author).lower()).row)
 
-                val = wks.cell(row,column)
-                if "N/A" not in val.value:
-                    wks.update_cell(row,column,"Aye")
+            else:
+                if "aye" in str(comment.body).lower():
+                    already_done.append(comment.id)
+                    row = int(wks.find(str(comment.author).lower()).row)
 
-            if "nay" in str(comment.body).lower():
-                already_done.append(comment.id)
-                row = wks.find(str(comment.author).lower()).row
-                val = wks.cell(row,column).value
-                if "N/A" not in val:
-                    wks.update_cell(row,column,"Nay")
+                    val = wks.cell(row,column)
+                    if "N/A" not in val.value:
+                        wks.update_cell(row,column,"Aye")
+
+                if "nay" in str(comment.body).lower():
+                    already_done.append(comment.id)
+                    row = wks.find(str(comment.author).lower()).row
+                    val = wks.cell(row,column).value
+                    if "N/A" not in val:
+                        wks.update_cell(row,column,"Nay")
 
 def deformat():
     cell_list = wks.range("C3:C141")
