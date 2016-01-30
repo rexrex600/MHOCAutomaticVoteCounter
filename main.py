@@ -21,7 +21,7 @@ r.login(user,password)
 print("Post Voting Thread Link")
 tread = str(input())
 print("Post billnumber(without the L infront of it)")
-bill = 'L'+input()
+bill = 'LB'+input()
 
 
 
