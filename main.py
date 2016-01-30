@@ -39,13 +39,13 @@ def VoteCount(thread,billnum):
         
                 
             if "content" in str(comment.body).lower() and "not" not in str(comment.body).lower():
-                row = wks.find(str(comment.body).lower()).row
+                row = wks.find(str(comment.author).lower()).row
                 val = wks.cell(row,column).value
                 if "N/A" not in val:
                     wks.update_cell(row,column,"Content")
                     already_done.append(comment.id)
             if "content" in str(comment.body).lower() and "not" in str(comment.body).lower():
-                row = wks.find(str(comment.body).lower()).row
+                row = wks.find(str(comment.author).lower()).row
                 val = wks.cell(row,column).value
                 if "N/A" not in val:
                     wks.update_cell(row,column,"Not Content")
