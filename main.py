@@ -20,8 +20,8 @@ password = str(input())
 r.login(user,password)
 print("Post Voting Thread Link")
 tread = str(input())
-print("Post billnumber(without the B infront of it)")
-bill = 'B'+input()
+print("Post billnumber(without the L infront of it)")
+bill = 'L'+input()
 
 
 
@@ -37,27 +37,22 @@ def VoteCount(thread,billnum):
             print(comment.body)
             print(comment.author)
             try:
-                already_done.append(comment.id)
-                if "aye" in str(comment.body).lower():
-                    already_done.append(comment.id)
-                    row = int(wks.find(str(comment.author).lower()).row)
-
-                    val = wks.cell(row,column)
-                    if "N/A" not in val.value:
-                        wks.update_cell(row,column,"Aye")
-
-                if "nay" in str(comment.body).lower():
-                    already_done.append(comment.id)
-                    row = wks.find(str(comment.author).lower()).row
+                
+                if "content" in str(comment.body).lower() and "not" not in str(comment.body).lower():
+                    row = wks.find(str(comment.body).lower()).row
                     val = wks.cell(row,column).value
                     if "N/A" not in val:
-                        wks.update_cell(row,column,"Nay")
-                if "abstain" in str(comment.body).lower():
-                    already_done.append(comment.id)
-                    row = wks.find(str(comment.author).lower()).row
+                        wks.update_cell(row,column,"Content")
+                        already_done.append(comment.id)
+                if "content" in str(comment.body).lower() and "not" in str(comment.body).lower():
+                    row = wks.find(str(comment.body).lower()).row
                     val = wks.cell(row,column).value
                     if "N/A" not in val:
-                        wks.update_cell(row,column,"Abst")
+                        wks.update_cell(row,column,"Not Content")
+                        already_done.append(comment.id)
+                
+                
+               
             except gspread.exceptions.CellNotFound:
                 print("Automod Comment")
 
