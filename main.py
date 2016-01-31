@@ -20,9 +20,13 @@ password = str(input())
 r.login(user,password)
 print("Post Voting Thread Link")
 tread = str(input())
-print("Post billnumber(without the B infront of it)")
-bill = 'B'+input()
-
+legtype = int(input("Press 1 For Bills 2 For Motions"))
+if legtype == 1:
+	print("Post billnumber(without the B infront of it)")
+	bill = 'B'+input()
+if legtype == 2:
+	print("Post motionnumber(without the M infront of it)")
+	bill = 'M'+input()	
 
 
 def VoteCount(thread,billnum):
