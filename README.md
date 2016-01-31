@@ -6,3 +6,4 @@ Requires:
 * Oauth2Client
 * GSpread
 * JSON
+* PyOpenSSL
