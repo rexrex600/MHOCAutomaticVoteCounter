@@ -30,13 +30,13 @@ print("Press 1 For Lords Bill 2 For Commons Bill 3 For a Lords' Motion")
 type = int(input())
 if type == 1:
 	print("Bill Number (Without the LB)")
-	bill = 'LB'+input(Bill Number:)
+	bill = 'LB'+input("Bill Number:")
 if type == 2:
 	print("Bill Number (Without the B)")
-	bill = 'B'+input(Bill Number:)
+	bill = 'B'+input("Bill Number:")
 if type == 3:
 	print("Lords' Motion Number (Without the LM)")
-	bill = 'LM'+input(Motion Number:)
+	bill = 'LM'+input("Motion Number:"")
 
 def VoteCount(thread,billnum):
     column = int(wks.find(billnum).col)
