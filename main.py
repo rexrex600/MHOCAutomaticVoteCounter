@@ -36,7 +36,7 @@ if type == 2:
 	bill = 'B'+input("Bill Number:")
 if type == 3:
 	print("Lords' Motion Number (Without the LM)")
-	bill = 'LM'+input("Motion Number:"")
+	bill = 'LM'+input("Motion Number:")
 
 def VoteCount(thread,billnum):
     column = int(wks.find(billnum).col)
