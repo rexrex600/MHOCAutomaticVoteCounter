@@ -11,7 +11,7 @@ scope = ['https://spreadsheets.google.com/feeds']
 credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
 r = praw.Reddit("Vote Counting Bot")
 gc = gspread.authorize(credentials)
-sh = gc.open('Copy of MHoC Master Sheet')
+sh = gc.open('MHoC Master Sheet')
 wks = sh.worksheet("7th Govt Voting Record")
 #User Input for Reddit/ Reddit information
 user = str(input("Reddit Username:"))
@@ -23,10 +23,10 @@ tread = str(input())
 legtype = int(input("Press 1 For Bills 2 For Motions"))
 if legtype == 1:
 	print("Post billnumber(without the B infront of it)")
-	bill = 'B'+input("Bill Number")
+	bill = 'B'+input("Bill Number:")
 if legtype == 2:
 	print("Post motionnumber(without the M infront of it)")
-	bill = 'M'+input("Motion Number")	
+	bill = 'M'+input("Motion Number:")	
 
 
 def VoteCount(thread,billnum):
