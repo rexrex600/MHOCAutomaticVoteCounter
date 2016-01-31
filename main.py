@@ -11,8 +11,8 @@ scope = ['https://spreadsheets.google.com/feeds']
 credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
 r = praw.Reddit("Vote Counting Bot")
 gc = gspread.authorize(credentials)
-sh = gc.open('Copy of MHoC Master Sheet')
-wks = sh.worksheet("7th Govt Voting Record")
+sh = gc.open('MHoL Master Sheet')
+wks = sh.worksheet("VII - Amendment Votes")
 #User Input for Reddit/ Reddit information
 user = str(input("Reddit Username:"))
 print("Reddit Password:")
@@ -20,8 +20,8 @@ password = str(input())
 r.login(user,password)
 print("Post Voting Thread Link")
 tread = str(input())
-print("Post billnumber(without the L infront of it)")
-bill = 'LB'+input()
+print("Post billnumber(without the B infront of it) if it is a LB remove the L temporarily")
+bill = 'B'+input()
 
 
 
@@ -42,13 +42,13 @@ def VoteCount(thread,billnum):
                 row = wks.find(str(comment.author).lower()).row
                 val = wks.cell(row,column).value
                 if "N/A" not in val:
-                    wks.update_cell(row,column,"Content")
+                    wks.update_cell(row,column,"Con")
                     already_done.append(comment.id)
             if "content" in str(comment.body).lower() and "not" in str(comment.body).lower():
                 row = wks.find(str(comment.author).lower()).row
                 val = wks.cell(row,column).value
                 if "N/A" not in val:
-                    wks.update_cell(row,column,"Not Content")
+                    wks.update_cell(row,column,"Not")
                     already_done.append(comment.id)
                 
                 
