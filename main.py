@@ -12,7 +12,12 @@ credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['
 r = praw.Reddit("Vote Counting Bot")
 gc = gspread.authorize(credentials)
 sh = gc.open('MHoL Master Sheet')
-wks = sh.worksheet("VII - Amendment Votes")
+print("Press 1 For Main Votes 2 For Amendment Votes")
+vote = int(input())
+if vote == 1:
+	wks = sh.worksheet("VII - Bill and Motion Votes")
+if vote == 2:
+	wks = sh.worksheet("VII - Amendment Votes")
 #User Input for Reddit/ Reddit information
 user = str(input("Reddit Username:"))
 print("Reddit Password:")
@@ -20,7 +25,7 @@ password = str(input())
 r.login(user,password)
 print("Post Voting Thread Link")
 tread = str(input())
-print("Post billnumber(without the B infront of it) if it is a LB remove the L temporarily")
+print("Post billnumber(without the B infront of it) if it is a LB remove the L temporarily from the top of spreadsheet column")
 bill = 'B'+input()
 
 
