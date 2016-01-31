@@ -26,9 +26,14 @@ r.login(user,password)
 print("Post Voting Thread Link")
 tread = str(input())
 print("Post billnumber(without the B infront of it) if it is a LB remove the L temporarily from the top of spreadsheet column")
-bill = 'B'+input()
-
-
+print("Press 1 For Lords Bill 2 For Commons Bill 3 For a Lords' Motion")
+type = int(input())
+if type == 1:
+	bill = 'LB'+input()
+if type == 2:
+	bill = 'B'+input()
+if type == 3:
+	bill = 'LM'+input()
 
 def VoteCount(thread,billnum):
     column = int(wks.find(billnum).col)
