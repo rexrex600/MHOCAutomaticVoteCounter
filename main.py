@@ -49,6 +49,7 @@ def VoteCount(thread,billnum):
         if comment.id not in already_done:
             print(comment.body)
             print(comment.author)
+		try:
 			if "content" in str(comment.body).lower() and "not" not in str(comment.body).lower():
 				row = wks.find(str(comment.author).lower()).row
 				val = wks.cell(row,column).value
