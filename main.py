@@ -34,6 +34,7 @@ def VoteCount(thread,billnum):
 
     already_done = []
     submission = r.get_submission(thread)
+    submission.replace_more_comments(limit=None, threshold=0)
     comments = praw.helpers.flatten_tree(submission.comments)
 
     for comment in comments:
