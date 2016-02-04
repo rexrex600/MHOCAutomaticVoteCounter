@@ -12,7 +12,7 @@ credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['
 r = praw.Reddit("Vote Counting Bot")
 gc = gspread.authorize(credentials)
 sh = gc.open('MHoC Master Sheet')
-wks = sh.worksheet("7th Govt Voting Record")
+wks = sh.worksheet("8th Govt Voting Record")
 #User Input for Reddit/ Reddit information
 user = str(input("Reddit Username:"))
 print("Reddit Password:")
