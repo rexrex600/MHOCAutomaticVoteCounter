@@ -37,7 +37,8 @@ for cell in cells:
         break
 print(column)
 #DNVing
-bottomRow = int(wks.find('Speaker').row) - 1
+bottomRow = 127
+cell_list = wks.range(wks.get_addr_int(1,1) + ":")
 print(bottomRow)
 cell_list = wks.range(wks.get_addr_int(3, column) +  ':' +
         wks.get_addr_int(bottomRow, column))
@@ -56,11 +57,6 @@ print(billNum)
 wks.update_cell(2, column, billNum)
 
 
-if not re.search('^L', title) is None:
-    wks.update_cell(1, column, 'L')
-# else:
-    #TODO find a way of doing parties wks.update_cell(1, column, 'C')
-
 submission.replace_more_comments(limit=None, threshold=0)
 comments = praw.helpers.flatten_tree(submission.comments)
 
@@ -72,18 +68,18 @@ for comment in comments:
             cellValue = ''
             if 'aye' in str(comment.body).lower():
                 already_done.append(comment.id)
-                cellValue = 'aye'
+                cellValue = 'Aye'
 
             if 'nay' in str(comment.body).lower():
                 already_done.append(comment.id)
-                cellValue = 'nay'
+                cellValue = 'Nay'
 
             if 'abstain' in str(comment.body).lower():
                 already_done.append(comment.id)
-                cellValue = 'abs'
+                cellValue = 'Abs'
             if not 'N/A' == wks.cell(row, column).value:
                 if not comment.author in done_voters:
-                    wks.update_cell(row,column,'Aye')
+                    wks.update_cell(row,column,cellValue)
                     done_voters.append(comment.author)
                 else:
                     print('Dupe found: ' + comment.author)
