@@ -19,7 +19,7 @@ scope = ['https://spreadsheets.google.com/feeds']
 credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
 r = praw.Reddit('MHOC-plebian house, vote counter v1')
 gc = gspread.authorize(credentials)
-sh = gc.open('MHoC Slave Sheet')
+sh = gc.open('MHoC Master Sheet')
 wks = sh.worksheet(sheetName)
 #User Input for Reddit/ Reddit information
 user = str(input('Reddit Username:'))
