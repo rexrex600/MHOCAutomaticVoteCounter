@@ -1,90 +1,94 @@
-__author__ = 'agentnola'
-import praw
-import json
+__author__ = [  'agentnola', 'chrispytoast123', 'jb567' ]
 import gspread
+import json
+import praw
+import re
 from oauth2client.client import SignedJwtAssertionCredentials
+
+#Variables
+
+sheetName = '8th Govt Voting Record'
+already_done = []
+done_voters = []
+dupes = []
 
 #Loads the JSON Key, which is provided seperately
 json_key = json.load(open('VoteCounter2-af942bc69325.json'))
 scope = ['https://spreadsheets.google.com/feeds']
-# Initilises all the credentials, and GoogleSheet stuff 
+# Initilises all the credentials, and GoogleSheet stuff
 credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
-r = praw.Reddit("Vote Counting Bot")
+r = praw.Reddit('MHOC-plebian house, vote counter v1')
 gc = gspread.authorize(credentials)
 sh = gc.open('MHoC Master Sheet')
-wks = sh.worksheet("8th Govt Voting Record")
+wks = sh.worksheet(sheetName)
 #User Input for Reddit/ Reddit information
-user = str(input("Reddit Username:"))
-print("Reddit Password:")
-password = str(input())
+user = str(input('Reddit Username:'))
+password = str(input('Reddit Password:'))
 r.login(user,password)
-print("Post Voting Thread Link")
-tread = str(input())
-legtype = int(input("Press 1 For Bills 2 For Motions 3 For Lord Bills"))
-if legtype == 1:
-	print("Post billnumber(without the B infront of it)")
-	bill = 'B'+input("Bill Number:")
-if legtype == 2:
-	print("Post motionnumber(without the M infront of it)")
-	bill = 'M'+input("Motion Number:")	
+print('Post Voting Thread Link')
+thread = str(input())
 
-if legtype == 3:
-	print("Post billnumber(without the LB infront of it)")
-	bill = 'LB'+input("Lord Bill Number:")	
+#getColumn
+column = 0
+cells = wks.range('F3:BZ3')
+for cell in cells:
+    if cell.value == '':
+        column = cell.col
+        break
+print(column)
+#DNVing
+bottomRow = 127
+cell_list = wks.range(wks.get_addr_int(1,1) + ":")
+print(bottomRow)
+cell_list = wks.range(wks.get_addr_int(3, column) +  ':' +
+        wks.get_addr_int(bottomRow, column))
+for cell in cell_list:
+    if not cell.value == 'N/A':
+      cell.value='DNV'
+wks.update_cells(cell_list)
 
-def VoteCount(thread,billnum):
-    column = int(wks.find(billnum).col)
 
-    already_done = []
-    submission = r.get_submission(thread)
-    submission.replace_more_comments(limit=None, threshold=0)
-    comments = praw.helpers.flatten_tree(submission.comments)
+submission = r.get_submission(thread)
 
-    for comment in comments:
-        if comment.id not in already_done:
-            print(comment.body)
-            print(comment.author)
-            try:
+#Name The Bill
+title = str(submission.title)
+billNum = str(re.search('^(\S+)', title).group())
+print(billNum)
+wks.update_cell(2, column, billNum)
+
+
+submission.replace_more_comments(limit=None, threshold=0)
+comments = praw.helpers.flatten_tree(submission.comments)
+
+for comment in comments:
+    if comment.id not in already_done:
+        print(str(comment.author) + ': ' + str(comment.body))
+        try:
+            row = int(wks.find(str(comment.author).lower()).row)
+            cellValue = ''
+            if 'aye' in str(comment.body).lower():
                 already_done.append(comment.id)
-                if "aye" in str(comment.body).lower():
-                    already_done.append(comment.id)
-                    row = int(wks.find(str(comment.author).lower()).row)
+                cellValue = 'Aye'
 
-                    val = wks.cell(row,column)
-                    if "N/A" not in val.value:
-                        wks.update_cell(row,column,"Aye")
+            if 'nay' in str(comment.body).lower():
+                already_done.append(comment.id)
+                cellValue = 'Nay'
 
-                if "nay" in str(comment.body).lower():
-                    already_done.append(comment.id)
-                    row = wks.find(str(comment.author).lower()).row
-                    val = wks.cell(row,column).value
-                    if "N/A" not in val:
-                        wks.update_cell(row,column,"Nay")
-                if "abstain" in str(comment.body).lower():
-                    already_done.append(comment.id)
-                    row = wks.find(str(comment.author).lower()).row
-                    val = wks.cell(row,column).value
-                    if "N/A" not in val:
-                        wks.update_cell(row,column,"Abst")
-            except gspread.exceptions.CellNotFound:
-                print("Automod Comment")
-
-
-
-def deformat():
-    cell_list = wks.range("C3:C141")
-    for cell in cell_list:
-        value = str(cell.value).lower()
+            if 'abstain' in str(comment.body).lower():
+                already_done.append(comment.id)
+                cellValue = 'Abs'
+            if not 'N/A' == wks.cell(row, column).value:
+                if not comment.author in done_voters:
+                    wks.update_cell(row,column,cellValue)
+                    done_voters.append(comment.author)
+                else:
+                    print('Dupe found: ' + comment.author)
+                    dupes.append(comment.author)
+        except gspread.exceptions.CellNotFound:
+            print('Automod Comment')
+        
+print('Dupes: ' + str(dupes))
+print('Done!')
 
 
 
-        wks.update_cell(cell.row,cell.col,value)
-
-
-
-
-
-
-
-##deformat()
-VoteCount(tread,bill)
