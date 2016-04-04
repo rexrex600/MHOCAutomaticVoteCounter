@@ -7,7 +7,7 @@ from oauth2client.client import SignedJwtAssertionCredentials
 
 #Variables
 
-sheetName = '8th Govt Voting Record'
+sheetName = '10th Govt Voting Record'
 already_done = []
 done_voters = []
 dupes = []
@@ -38,8 +38,14 @@ for cell in cells:
 print(column)
 #DNVing
 bottomRow = 127
-cell_list = wks.range(wks.get_addr_int(1,1) + ":")
+cell_list = wks.range(wks.get_addr_int(1,4) + ":" + wks.get_addr_int(137,4)
+#Find Bottom Row
+for cell in cell_list:
+    if cell.value == "Speaker"
+        bottomRow = cell.row
+
 print(bottomRow)
+
 cell_list = wks.range(wks.get_addr_int(3, column) +  ':' +
         wks.get_addr_int(bottomRow, column))
 for cell in cell_list:
@@ -54,7 +60,7 @@ submission = r.get_submission(thread)
 title = str(submission.title)
 billNum = str(re.search('^(\S+)', title).group())
 print(billNum)
-wks.update_cell(2, column, billNum)
+wks.update_cell(2, column, "=billNum)
 
 
 submission.replace_more_comments(limit=None, threshold=0)
