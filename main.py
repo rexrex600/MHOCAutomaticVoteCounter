@@ -38,7 +38,7 @@ for cell in cells:
 print(column)
 #DNVing
 bottomRow = 127
-cell_list = wks.range(wks.get_addr_int(1,4) + ":" + wks.get_addr_int(137,4)
+cell_list = wks.range(wks.get_addr_int(1,4) + ":" + wks.get_addr_int(137,4))
 #Find Bottom Row
 for cell in cell_list:
     if cell.value == "Speaker"
