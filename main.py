@@ -60,7 +60,7 @@ submission = r.get_submission(thread)
 title = str(submission.title)
 billNum = str(re.search('^(\S+)', title).group())
 print(billNum)
-wks.update_cell(2, column, "=billNum)
+wks.update_cell(2, column, "=HYPERLINK(\"" + thread + "\", \"" + billNum + "\")")
 
 
 submission.replace_more_comments(limit=None, threshold=0)
