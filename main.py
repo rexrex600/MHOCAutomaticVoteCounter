@@ -88,7 +88,7 @@ for comment in comments:
                     wks.update_cell(row,column,cellValue)
                     done_voters.append(comment.author)
                 else:
-                    print('Dupe found: ' + comment.author)
+                    print('Dupe found: ' + str(comment.author))
                     dupes.append(comment.author)
         except gspread.exceptions.CellNotFound:
             print('Automod Comment')
