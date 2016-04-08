@@ -7,6 +7,21 @@ import re
 from oauth2client.client import SignedJwtAssertionCredentials
 import multiprocessing
 
+#Number of threads for use in the execution of the count
+
+def get_thread_number():
+    number_threads = input("Use how many threads: ")
+    try:
+        number_threads = int(number_threads)
+        return number_threads
+    except ValueError:
+        print("the number of threads must be a number")
+        get_thread_number()
+
+#Call to get_thread_number()
+
+p = multiprocessing.Pool(get_thread_number)
+
 #Variables
 
 sheetName = '10th Govt Voting Record'
@@ -50,9 +65,13 @@ print(bottomRow)
 
 cell_list = wks.range(wks.get_addr_int(3, column) +  ':' +
         wks.get_addr_int(bottomRow, column))
-for cell in cell_list:
+##for cell in cell_list:
+def set_to_dnv(cell):
     if not cell.value == 'N/A':
       cell.value='DNV'
+
+p.map(set_to_dnv, [i for i in cell_list])
+
 wks.update_cells(cell_list)
 
 
@@ -96,16 +115,6 @@ def vote_counter(comment):
                     dupes.append(comment.author)
         except gspread.exceptions.CellNotFound:
             print('Automod Comment')
-
-def get_thread_number():
-    number_threads = input("Use how many threads: ")
-    try:
-        number_threads = int(number_threads)
-        return number_threads
-    except ValueError:
-        print("the number of threads must be a number")
-        get_thread_number()
-
 
 p = multiprocessing.Pool(get_thread_number())
 
