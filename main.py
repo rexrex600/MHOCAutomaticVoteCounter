@@ -70,7 +70,7 @@ def set_to_dnv(cell):
     if not cell.value == 'N/A':
       cell.value='DNV'
 
-p.map(set_to_dnv, [i for i in cell_list])
+p.map(set_to_dnv(), [i for i in cell_list])
 
 wks.update_cells(cell_list)
 
@@ -118,7 +118,7 @@ def vote_counter(comment):
 
 p = multiprocessing.Pool(get_thread_number())
 
-p.map(vote_counter, [i for i in comments])
+p.map(vote_counter(), [i for i in comments])
 
 print('Dupes: ' + str(dupes))
 print('Done!')
