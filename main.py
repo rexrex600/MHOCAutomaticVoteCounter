@@ -1,4 +1,5 @@
-__author__ = [  'agentnola', 'chrispytoast123', 'jb567' ]
+#!
+__author__ = [  'agentnola', 'chrispytoast123', 'jb567', 'rexrex600' ]
 import gspread
 import json
 import praw
