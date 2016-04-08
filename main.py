@@ -4,6 +4,7 @@ import json
 import praw
 import re
 from oauth2client.client import SignedJwtAssertionCredentials
+import multiprocessing
 
 #Variables
 
@@ -66,7 +67,9 @@ wks.update_cell(2, column, "=HYPERLINK(\"" + thread + "\", \"" + billNum + "\")"
 submission.replace_more_comments(limit=None, threshold=0)
 comments = praw.helpers.flatten_tree(submission.comments)
 
-for comment in comments:
+##for comment in comments:
+
+def vote_counter(comment):
     if comment.id not in already_done:
         print(str(comment.author) + ': ' + str(comment.body))
         try:
@@ -92,7 +95,21 @@ for comment in comments:
                     dupes.append(comment.author)
         except gspread.exceptions.CellNotFound:
             print('Automod Comment')
-        
+
+def get_thread_number():
+    number_threads = input("Use how many threads: ")
+    try:
+        number_threads = int(number_threads)
+        return number_threads
+    except ValueError:
+        print("the number of threads must be a number")
+        get_thread_number()
+
+
+p = multiprocessing.Pool(get_thread_number())
+
+p.map(vote_counter, [i for i in comments])
+
 print('Dupes: ' + str(dupes))
 print('Done!')
 
