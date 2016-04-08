@@ -80,11 +80,11 @@ def vote_counter(comment):
                 already_done.append(comment.id)
                 cellValue = 'Aye'
 
-            if 'nay' in str(comment.body).lower():
+            elif 'nay' in str(comment.body).lower():
                 already_done.append(comment.id)
                 cellValue = 'Nay'
 
-            if 'abstain' in str(comment.body).lower():
+            elif 'abstain' in str(comment.body).lower():
                 already_done.append(comment.id)
                 cellValue = 'Abs'
             if not 'N/A' == wks.cell(row, column).value:
