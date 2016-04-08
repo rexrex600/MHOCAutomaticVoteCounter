@@ -7,3 +7,4 @@ Requires:
 * GSpread
 * JSON
 * PyOpenSSL
+* multiprocessing
