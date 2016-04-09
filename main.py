@@ -1,5 +1,6 @@
 #!
 __author__ = __author__ = [  'agentnola', 'chrispytoast123', 'jb567', 'electric-blue', 'rexrex600' ]
+
 import gspread
 import json
 import praw
@@ -31,11 +32,9 @@ def login():
 #   Variables
 
 sheetName = '10th Govt Voting Record'
-already_done = []
-done_voters = []
-dupes = []
 docName = 'MHoC Master Sheet'
 docKey = 'VoteCounter2-af942bc69325.json'
+totalMPs = 100
 
 #   Loads the JSON Key, which is provided seperately
 json_key = json.load(open(docKey))
@@ -112,6 +111,15 @@ def getUpdateCells(MPs):
     return updateList
 
 
+#   Function to count aye/nay/abs votes
+def sumVotes(vote, votes):
+    total = 0
+    for i in votes:
+        if i == vote:
+            total += 1
+    return total
+
+
 #   Function to title column into which votes will be recorded
 def titleCol():
     col = getCol()
@@ -129,6 +137,8 @@ titleCol()
 votes = getVotes(rThread)
 gMPs = getMPs()
 updateList = getUpdateCells(gMPs)
+duplicateVotes = []
+votesFinal = []
 
 
 #   Counting Function
@@ -165,17 +175,29 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
         MP, vote, isDupe = out
         if isDupe == False:
             print(MP + " : " + vote)
+            if not vote == 'DNV':
+                votesFinal.append(vote)
+            
         else:
             print(MP + " voted more than once and recieved a DNV")
+            duplicateVotes.append(MP)
         updateList[gMPs.index(MP)].value = vote
 
 #   Updating spreadsheet 
 wks.update_cells(updateList)
 
+#   Counting total valid aye, nay and abs votes and turnout
+print("The Ayes to the right: " + str(sumVotes('Aye', votesFinal)))
+print("The Noes to the right: " + str(sumVotes('Nay', votesFinal)))
+print("Abstentions: " + str(sumVotes('Abs', votesFinal)))
+print(len(votesFinal), len(gMPs))
+turnout = str((len(votesFinal)/totalMPs)*100)
+print("Turnout: " + turnout + "%")
+      
 
 #   Recording end time
 end = time.time()
 
 
 #   Feeding back total runtime - Generally around 20 seconds
-print("The count took " + end-strt + " seconds")
+print("The count took " + str(end-strt) + " seconds")
