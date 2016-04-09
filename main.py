@@ -14,11 +14,13 @@ import time
 #   Error checking functions
 
 def checkURL():
+    #Collects URL to be counted from
     print('Copy Voting Thread Link Below')
     URL = str(input())
     return URL
 
 def login():
+    #Collects login information for the user's reddit account
     user = str(input('Reddit Username:'))
     try:
         r.login(user,getpass.getpass('Reddit Password:'))
@@ -32,8 +34,8 @@ sheetName = '10th Govt Voting Record'
 already_done = []
 done_voters = []
 dupes = []
-docName = 'Slave Sheet'
-docKey = 'DriveAPI-8b5effde4bd4.json'
+docName = 'MHoC Master Sheet'
+docKey = 'VoteCounter2-af942bc69325.json'
 
 #   Loads the JSON Key, which is provided seperately
 json_key = json.load(open(docKey))
@@ -48,18 +50,25 @@ wks = sh.worksheet(sheetName)
 login()
 rThread = checkURL()
 
+
+#   Recording program start time
 strt = time.time()
 
 
 
 ##  FUNCTION DEFINITIONS
 
+
+
+#   Function to find the bottom of the table of MPs
 def findLastMP(wksColumn):
     wksCellList = wks.col_values(wksColumn)
     for wksCell in wksCellList:
         if wksCell == "Speaker":
             return wks.find(wksCell).row
 
+
+#   Function to return full list of sitting MPs
 def getMPs():
     col = getCol()
     wksMPs = wks.col_values(3)[2:findLastMP(4)-1]
@@ -70,6 +79,8 @@ def getMPs():
             wksMPs.remove(i)
     return wksMPs
 
+
+#   Function to return votes from the division thread
 def getVotes(url):
     #getting the list of comments
     rThread = r.get_submission(url)
@@ -78,6 +89,8 @@ def getVotes(url):
     #returning the list of comments
     return rComments
 
+
+#   Function to return left-most empty column into which the results are recorded
 def getCol():
     cells = wks.range('F3:BZ3')
     for cell in cells:
@@ -86,6 +99,8 @@ def getCol():
             break
     return col
 
+
+#   Function to determine which cells need updating
 def getUpdateCells(MPs):
     col = getCol()
     updateList = wks.range(str(wks.get_addr_int(3, col)) + ":" + wks.get_addr_int(findLastMP(4)-1, col))
@@ -96,8 +111,9 @@ def getUpdateCells(MPs):
             updateList.remove(i)
     return updateList
 
+
+#   Function to title column into which votes will be recorded
 def titleCol():
-    #setting up the spreadsheet for the count
     col = getCol()
     title = str(rThread.title())
     billNum = title.split("/")[-2]
@@ -114,16 +130,21 @@ votes = getVotes(rThread)
 gMPs = getMPs()
 updateList = getUpdateCells(gMPs)
 
+
+#   Counting Function
 def countVote(gMP):
+    #Checking for multiple votes
     voteCount = 0
     for i in votes:
         if str(i.author).lower() == gMP.lower():
             voteCount += 1
+    #Handling more than one vote
     if voteCount > 1:
-        
         return gMP, 'DNV', True
+    #Handling no vote
     elif voteCount < 1:
         return gMP, 'DNV', False
+    #Handling exactly one vote
     else:
         for i in votes:
             if str(i.author).lower() == gMP.lower():
@@ -136,8 +157,11 @@ def countVote(gMP):
 
 print("The votes were as follows: ")
 
+
+#   Initialisation of worker pool and asigning counting function and tasks to worker pool - no set worker cap means that the worker cap defaults to the number of CPU cores present
 with concurrent.futures.ThreadPoolExecutor() as executor:
     for out in executor.map(countVote, gMPs):
+        #Handling output from counting function
         MP, vote, isDupe = out
         if isDupe == False:
             print(MP + " : " + vote)
@@ -145,8 +169,13 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
             print(MP + " voted more than once and recieved a DNV")
         updateList[gMPs.index(MP)].value = vote
 
+#   Updating spreadsheet 
 wks.update_cells(updateList)
 
+
+#   Recording end time
 end = time.time()
 
+
+#   Feeding back total runtime - Generally around 20 seconds
 print("The count took " + end-strt + " seconds")
