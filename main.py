@@ -12,13 +12,16 @@ import time
 
 ##  INITIALISATION OF PROGRAM AND ERROR CHECKING FUNCTIONS
 
+
 #   Error checking functions
+
 
 def checkURL():
     #Collects URL to be counted from
     print('Copy Voting Thread Link Below')
     URL = str(input())
     return URL
+
 
 def login():
     #Collects login information for the user's reddit account
@@ -36,16 +39,27 @@ docName = 'MHoC Master Sheet'
 docKey = 'VoteCounter2-af942bc69325.json'
 totalMPs = 100
 
+
 #   Loads the JSON Key, which is provided seperately
+
+
 json_key = json.load(open(docKey))
 scope = ['https://spreadsheets.google.com/feeds']
+
+
 #   Initilises all the credentials, and GoogleSheet stuff
+
+
 credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
 r = praw.Reddit('MHOC-plebian house, vote counter v1')
 gc = gspread.authorize(credentials)
 sh = gc.open(docName)
 wks = sh.worksheet(sheetName)
+
+
 #   User Input for Reddit/ Reddit information
+
+
 login()
 rThread = checkURL()
 
@@ -56,7 +70,6 @@ strt = time.time()
 
 
 ##  FUNCTION DEFINITIONS
-
 
 
 #   Function to find the bottom of the table of MPs
@@ -133,6 +146,7 @@ def titleCol():
 #   Prepping spreadsheet
 titleCol()
 
+
 #   Compiling working lists
 votes = getVotes(rThread)
 gMPs = getMPs()
@@ -165,6 +179,7 @@ def countVote(gMP):
                 elif 'abstain' in str(i.body).lower():
                     return gMP, 'Abs', False
 
+
 print("The votes were as follows: ")
 
 
@@ -183,8 +198,10 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
             duplicateVotes.append(MP)
         updateList[gMPs.index(MP)].value = vote
 
+
 #   Updating spreadsheet 
 wks.update_cells(updateList)
+
 
 #   Counting total valid aye, nay and abs votes and turnout
 print("The Ayes to the right: " + str(sumVotes('Aye', votesFinal)))
