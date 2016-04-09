@@ -1,127 +1,152 @@
 #!
-__author__ = [  'agentnola', 'chrispytoast123', 'jb567', 'rexrex600' ]
+__author__ = __author__ = [  'agentnola', 'chrispytoast123', 'jb567', 'electric-blue', 'rexrex600' ]
 import gspread
 import json
 import praw
 import re
 from oauth2client.client import SignedJwtAssertionCredentials
-import multiprocessing
+import concurrent.futures
+import getpass
+import time
 
-#Number of threads for use in the execution of the count
+##  INITIALISATION OF PROGRAM AND ERROR CHECKING FUNCTIONS
 
-def get_thread_number():
-    number_threads = input("Use how many threads: ")
+#   Error checking functions
+
+def checkURL():
+    print('Copy Voting Thread Link Below')
+    URL = str(input())
+    return URL
+
+def login():
+    user = str(input('Reddit Username:'))
     try:
-        number_threads = int(number_threads)
-        return number_threads
-    except ValueError:
-        print("the number of threads must be a number")
-        get_thread_number()
+        r.login(user,getpass.getpass('Reddit Password:'))
+    except praw.errors.InvalidUserPass:
+        print ("Incorrect Password")
+        login()
 
-#Call to get_thread_number()
-
-p = multiprocessing.Pool(get_thread_number)
-
-#Variables
+#   Variables
 
 sheetName = '10th Govt Voting Record'
 already_done = []
 done_voters = []
 dupes = []
+docName = 'Slave Sheet'
+docKey = 'DriveAPI-8b5effde4bd4.json'
 
-#Loads the JSON Key, which is provided seperately
-json_key = json.load(open('VoteCounter2-af942bc69325.json'))
+#   Loads the JSON Key, which is provided seperately
+json_key = json.load(open(docKey))
 scope = ['https://spreadsheets.google.com/feeds']
-# Initilises all the credentials, and GoogleSheet stuff
+#   Initilises all the credentials, and GoogleSheet stuff
 credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
 r = praw.Reddit('MHOC-plebian house, vote counter v1')
 gc = gspread.authorize(credentials)
-sh = gc.open('MHoC Master Sheet')
+sh = gc.open(docName)
 wks = sh.worksheet(sheetName)
-#User Input for Reddit/ Reddit information
-user = str(input('Reddit Username:'))
-password = str(input('Reddit Password:'))
-r.login(user,password)
-print('Post Voting Thread Link')
-thread = str(input())
+#   User Input for Reddit/ Reddit information
+login()
+rThread = checkURL()
 
-#getColumn
-column = 0
-cells = wks.range('F3:BZ3')
-for cell in cells:
-    if cell.value == '':
-        column = cell.col
-        break
-print(column)
-#DNVing
-bottomRow = 127
-cell_list = wks.range(wks.get_addr_int(1,4) + ":" + wks.get_addr_int(137,4))
-#Find Bottom Row
-for cell in cell_list:
-    if cell.value == "Speaker":
-        bottomRow = cell.row
-
-print(bottomRow)
-
-cell_list = wks.range(wks.get_addr_int(3, column) +  ':' +
-        wks.get_addr_int(bottomRow, column))
-##for cell in cell_list:
-def set_to_dnv(cell):
-    if not cell.value == 'N/A':
-      cell.value='DNV'
-
-p.map(set_to_dnv(), [i for i in cell_list])
-
-wks.update_cells(cell_list)
-
-
-submission = r.get_submission(thread)
-
-#Name The Bill
-title = str(submission.title)
-billNum = str(re.search('^(\S+)', title).group())
-print(billNum)
-wks.update_cell(2, column, "=HYPERLINK(\"" + thread + "\", \"" + billNum + "\")")
-
-
-submission.replace_more_comments(limit=None, threshold=0)
-comments = praw.helpers.flatten_tree(submission.comments)
-
-##for comment in comments:
-
-def vote_counter(comment):
-    if comment.id not in already_done:
-        print(str(comment.author) + ': ' + str(comment.body))
-        try:
-            row = int(wks.find(str(comment.author).lower()).row)
-            cellValue = ''
-            if 'aye' in str(comment.body).lower():
-                already_done.append(comment.id)
-                cellValue = 'Aye'
-
-            elif 'nay' in str(comment.body).lower():
-                already_done.append(comment.id)
-                cellValue = 'Nay'
-
-            elif 'abstain' in str(comment.body).lower():
-                already_done.append(comment.id)
-                cellValue = 'Abs'
-            if not 'N/A' == wks.cell(row, column).value:
-                if not comment.author in done_voters:
-                    wks.update_cell(row,column,cellValue)
-                    done_voters.append(comment.author)
-                else:
-                    print('Dupe found: ' + str(comment.author))
-                    dupes.append(comment.author)
-        except gspread.exceptions.CellNotFound:
-            print('Automod Comment')
-
-p = multiprocessing.Pool(get_thread_number())
-
-p.map(vote_counter(), [i for i in comments])
-
-print('Dupes: ' + str(dupes))
-print('Done!')
+strt = time.time()
 
 
 
+##  FUNCTION DEFINITIONS
+
+def findLastMP(wksColumn):
+    wksCellList = wks.col_values(wksColumn)
+    for wksCell in wksCellList:
+        if wksCell == "Speaker":
+            return wks.find(wksCell).row
+
+def getMPs():
+    col = getCol()
+    wksMPs = wks.col_values(3)[2:findLastMP(4)-1]
+    wksMPIsSitting = wks.col_values(col)[2:findLastMP(4)-1]
+    for i in wksMPs:
+        if wksMPIsSitting[wksMPs.index(i)] == 'N/A':
+            del wksMPIsSitting[wksMPs.index(i)]
+            wksMPs.remove(i)
+    return wksMPs
+
+def getVotes(url):
+    #getting the list of comments
+    rThread = r.get_submission(url)
+    rThread.replace_more_comments(limit=None, threshold=0)
+    rComments = praw.helpers.flatten_tree(rThread.comments)
+    #returning the list of comments
+    return rComments
+
+def getCol():
+    cells = wks.range('F3:BZ3')
+    for cell in cells:
+        if cell.value == '':
+            col = cell.col
+            break
+    return col
+
+def getUpdateCells(MPs):
+    col = getCol()
+    updateList = wks.range(str(wks.get_addr_int(3, col)) + ":" + wks.get_addr_int(findLastMP(4)-1, col))
+    wksMPIsSitting = wks.col_values(col)[2:findLastMP(4)-1]
+    for i in updateList:
+        if wksMPIsSitting[updateList.index(i)] == 'N/A':
+            del wksMPIsSitting[updateList.index(i)]
+            updateList.remove(i)
+    return updateList
+
+def titleCol():
+    #setting up the spreadsheet for the count
+    col = getCol()
+    title = str(rThread.title())
+    billNum = title.split("/")[-2]
+    billNum = billNum.split("_")[0]
+    print("You are counting " + billNum)
+    wks.update_cell(2, col, "=HYPERLINK(\"" + rThread + "\", \"" + billNum + "\")")
+
+##  END OF DECLARATION OF UTILITY FUNCTIONS - MAIN PROGRAM BELOW
+#   Prepping spreadsheet
+titleCol()
+
+#   Compiling working lists
+votes = getVotes(rThread)
+gMPs = getMPs()
+updateList = getUpdateCells(gMPs)
+
+def countVote(gMP):
+    voteCount = 0
+    for i in votes:
+        if str(i.author).lower() == gMP.lower():
+            voteCount += 1
+    if voteCount > 1:
+        
+        return gMP, 'DNV', True
+    elif voteCount < 1:
+        return gMP, 'DNV', False
+    else:
+        for i in votes:
+            if str(i.author).lower() == gMP.lower():
+                if 'aye' in str(i.body).lower():
+                    return gMP, 'Aye', False
+                elif 'nay' in str(i.body).lower():
+                    return gMP, 'Nay', False
+                elif 'abstain' in str(i.body).lower():
+                    return gMP, 'Abs', False
+
+print("The votes were as follows: ")
+
+with concurrent.futures.ThreadPoolExecutor() as executor:
+    for out in executor.map(countVote, gMPs):
+        MP, vote, isDupe = out
+        if isDupe == False:
+            print(MP + " : " + vote)
+        else:
+            print(MP + " voted more than once and recieved a DNV")
+        updateList[gMPs.index(MP)].value = vote
+
+wks.update_cells(updateList)
+
+end = time.time()
+
+print("The count took " + end-strt + " seconds")
